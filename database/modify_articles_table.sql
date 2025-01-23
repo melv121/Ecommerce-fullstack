@@ -1,0 +1,4 @@
+ALTER TABLE articles
+ADD COLUMN promotion_price DECIMAL(10, 2) DEFAULT NULL,
+ADD COLUMN promotion_start DATE DEFAULT NULL,
+ADD COLUMN promotion_end DATE DEFAULT NULL;
