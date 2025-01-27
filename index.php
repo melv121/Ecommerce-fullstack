@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - Fishing-Store</title>
+    <title>Home - Fishop</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="/ecommerce/public/css/style.css">
@@ -46,14 +46,14 @@ if (!isset($_SESSION['user_id'])) {
 <body>
     <?php include __DIR__ . '/includes/navbar.php'; ?>
     <div class="hero-section">
-        <h1>Bienvenue dans notre Fishing-Store</h1>
+        <h1>Bienvenue chez Fishop</h1>
     </div>
     <main class="container mt-5">
         <section id="intro">
             <div class="row">
                 <div class="col-md-6">
                     <h2>À propos de nous</h2>
-                    <p>Bienvenue chez Fishing-Store, votre boutique unique pour tous vos besoins en matière de pêche. Nous proposons une large gamme d'équipements de pêche, y compris des cannes, des moulinets, des leurres et des accessoires. Que vous soyez débutant ou pêcheur expérimenté, nous avons tout ce dont vous avez besoin pour rendre vos sorties de pêche réussies et agréables. Notre mission est de fournir des produits de haute qualité à des prix compétitifs, ainsi qu'un service client exceptionnel. Explorez notre collection et trouvez l'équipement parfait pour votre prochaine aventure de pêche.</p>
+                    <p>Bienvenue chez Fishop, votre boutique unique pour tous vos besoins en matière de pêche. Nous proposons une large gamme d'équipements de pêche, y compris des cannes, des moulinets, des leurres et des accessoires. Que vous soyez débutant ou pêcheur expérimenté, nous avons tout ce dont vous avez besoin pour rendre vos sorties de pêche réussies et agréables. Notre mission est de fournir des produits de haute qualité à des prix compétitifs, ainsi qu'un service client exceptionnel. Explorez notre collection et trouvez l'équipement parfait pour votre prochaine aventure de pêche.</p>
                 </div>
             </div>
         </section>

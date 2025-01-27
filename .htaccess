@@ -1,0 +1,5 @@
+RewriteEngine On
+
+# Rediriger vers le dossier admin si l'URL est /admin
+RewriteRule ^admin$ /ecommerce/admin/users.php [L]
+

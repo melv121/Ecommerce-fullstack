@@ -20,6 +20,20 @@
             </li>
             <?php endif; ?>
         </ul>
+
+        
+        <form class="form-inline my-2 my-lg-0 mr-3">
+            <div class="input-group">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+                <input class="form-control" type="search" placeholder="Rechercher..." aria-label="Search">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-primary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+
         <ul class="navbar-nav ml-auto">
             <?php if (isset($_SESSION['user_id'])): ?>
                 <li class="nav-item">

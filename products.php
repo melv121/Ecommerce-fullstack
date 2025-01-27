@@ -1,9 +1,40 @@
 <?php
 require_once('config/database.php');
 
-// Récupération des articles
-$sql = "SELECT * FROM articles";
+// Pagination logic
+$limit = 12; // Number of products per page
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+// Category filter
+$category_id = isset($_GET['category_id']) ? (int)$_GET['category_id'] : 0;
+
+// Search filter
+$search = isset($_GET['search']) ? $_GET['search'] : '';
+
+// Fetch products with limit, offset, category, and search filters
+$sql = "SELECT * FROM articles WHERE 1";
+if ($category_id > 0) {
+    $sql .= " AND category_id = $category_id";
+}
+if (!empty($search)) {
+    $sql .= " AND (name LIKE '%$search%' OR description LIKE '%$search%')";
+}
+$sql .= " LIMIT $limit OFFSET $offset";
 $result = $conn->query($sql);
+
+// Fetch total number of products
+$total_sql = "SELECT COUNT(*) FROM articles WHERE 1";
+if ($category_id > 0) {
+    $total_sql .= " AND category_id = $category_id";
+}
+if (!empty($search)) {
+    $total_sql .= " AND (name LIKE '%$search%' OR description LIKE '%$search%')";
+}
+$total_result = $conn->query($total_sql);
+$total_row = $total_result->fetch_row();
+$total_articles = $total_row[0];
+$total_pages = ceil($total_articles / $limit);
 ?>
 
 <!DOCTYPE html>
@@ -13,6 +44,31 @@ $result = $conn->query($sql);
 </head>
 <body>
     <div class="container mt-4">
+        <!-- Category filter and search form -->
+        <form method="GET" action="products.php" class="mb-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <select name="category_id" class="form-control">
+                        <option value="0">Toutes les catégories</option>
+                        <?php
+                        $categories_sql = "SELECT * FROM categories";
+                        $categories_result = $conn->query($categories_sql);
+                        while ($category = $categories_result->fetch_assoc()): ?>
+                            <option value="<?php echo $category['id']; ?>" <?php if ($category_id == $category['id']) echo 'selected'; ?>>
+                                <?php echo htmlspecialchars($category['name']); ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" name="search" class="form-control" placeholder="Rechercher..." value="<?php echo htmlspecialchars($search); ?>">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary">Filtrer</button>
+                </div>
+            </div>
+        </form>
+
         <div class="row">
             <?php while($row = $result->fetch_assoc()): ?>
                 <div class="col-md-4 mb-4">
@@ -24,11 +80,7 @@ $result = $conn->query($sql);
                                  class="card-img-top" 
                                  alt="<?php echo htmlspecialchars($row['name']); ?>"
                                  style="height: 200px; object-fit: contain;">
-                        <?php else: ?>
-                            <img src="img/computer.jpg" 
-                                 class="card-img-top" 
-                                 alt="Image par défaut"
-                                 style="height: 200px; object-fit: contain;">
+                     
                         <?php endif; ?>
                         
                         <div class="card-body">
@@ -53,8 +105,37 @@ $result = $conn->query($sql);
                 </div>
             <?php endwhile; ?>
         </div>
+        
+        <!-- Pagination arrows and numbers -->
+        <div class="pagination">
+            <?php if($page > 1): ?>
+                <a href="?page=1&category_id=<?php echo $category_id; ?>&search=<?php echo htmlspecialchars($search); ?>" class="arrow">&laquo; Premier</a>
+                <a href="?page=<?php echo $page - 1; ?>&category_id=<?php echo $category_id; ?>&search=<?php echo htmlspecialchars($search); ?>" class="arrow">Précédent</a>
+            <?php endif; ?>
+
+            <?php
+            // Affichage des numéros de page
+            $start = max(1, $page - 2);
+            $end = min($total_pages, $page + 2);
+
+            for($i = $start; $i <= $end; $i++): ?>
+                <a href="?page=<?php echo $i; ?>&category_id=<?php echo $category_id; ?>&search=<?php echo htmlspecialchars($search); ?>" 
+                   class="page-number <?php echo ($i == $page) ? 'active' : ''; ?>">
+                    <?php echo $i; ?>
+                </a>
+            <?php endfor; ?>
+
+            <?php if($page < $total_pages): ?>
+                <a href="?page=<?php echo $page + 1; ?>&category_id=<?php echo $category_id; ?>&search=<?php echo htmlspecialchars($search); ?>" class="arrow">Suivant</a>
+                <a href="?page=<?php echo $total_pages; ?>&category_id=<?php echo $category_id; ?>&search=<?php echo htmlspecialchars($search); ?>" class="arrow">Dernier &raquo;</a>
+            <?php endif; ?>
+        </div>
     </div>
 
     <?php include 'template/footer.php'; ?>
 </body>
 </html>
+
+<?php
+$conn->close();
+?>

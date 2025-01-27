@@ -14,12 +14,14 @@
             <?php
             require_once __DIR__ . '/../../models/Article.php';
             $products = Article::getAll();
+            
+            $products = array_slice($products, 0, 3);
             foreach ($products as $product): ?>
                 <div class="product-item">
                     <?php if (!empty($product['image'])): ?>
-                        <img src="<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
+            
                     <?php else: ?>
-                        <img src="/ecommerce/public/image/computer.jpg" alt="Default Image">
+                        
                     <?php endif; ?>
                     <h3><?php echo htmlspecialchars($product['name']); ?></h3>
                     <p><?php echo htmlspecialchars($product['description']); ?></p>
