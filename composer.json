@@ -1,22 +1,12 @@
 {
-    "name": "yourname/ecommerce",
-    "description": "An eCommerce application",
-    "type": "project",
+    "name": "melvi/ecommerce",
+    "description": "Ecommerce project with fake data generation",
     "require": {
-        "php": "^8.2",
-        "ext-pdo": "*",
         "fakerphp/faker": "^1.24"
     },
     "autoload": {
         "psr-4": {
             "App\\": "src/"
         }
-    },
-    "authors": [
-        {
-            "name": "Your Name",
-            "email": "yourname@example.com"
-        }
-    ],
-    "minimum-stability": "stable"
+    }
 }

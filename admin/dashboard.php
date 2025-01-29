@@ -29,29 +29,9 @@ require_once __DIR__ . '/../includes/database.php';
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Gestion des produits</h5>
-                        <p class="card-text">Gérer les produits du catalogue</p>
-                        <a href="/ecommerce/admin/products.php" class="btn btn-primary">Gérer les produits</a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
                         <h5 class="card-title">Gestion des utilisateurs</h5>
                         <p class="card-text">Gérer les comptes utilisateurs</p>
                         <a href="/ecommerce/admin/users.php" class="btn btn-primary">Gérer les utilisateurs</a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Gestion des catégories</h5>
-                        <p class="card-text">Gérer les catégories de produits</p>
-                        <a href="/ecommerce/admin/categories.php" class="btn btn-primary">Gérer les catégories</a>
                     </div>
                 </div>
             </div>

@@ -1,88 +1,22 @@
 <?php
 session_start();
-require_once __DIR__ . '/../includes/database.php';
+require_once __DIR__ . '/../config/database.php'; // Assurez-vous que ce fichier initialise $pdo
 require_once __DIR__ . '/../includes/functions.php'; // Corrected path to the functions file
 require_once __DIR__ . '/../controllers/ProductController.php'; // Inclure le ProductController
+require_once __DIR__ . '/../models/Cart.php'; // Inclure le modèle Cart
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['product_id'])) {
-        $productId = intval($_POST['product_id']);
-        $product = getProductById($productId);
-
-        if ($product) {
-            if (isset($_POST['remove'])) {
-                // Logique pour supprimer un article du panier
-                if (isset($_SESSION['cartItems'])) {
-                    foreach ($_SESSION['cartItems'] as $key => $item) {
-                        if ($item['id'] === $productId) {
-                            unset($_SESSION['cartItems'][$key]);
-                            break;
-                        }
-                    }
-                    // Réindexer le tableau pour éviter les trous dans les clés
-                    $_SESSION['cartItems'] = array_values($_SESSION['cartItems']);
-                }
-            } else {
-                $quantity = 1; // Par défaut, ajouter une quantité de 1
-
-                // Ajouter la clé 'is_promotion' et 'original_price' si elles n'existent pas
-                if (!isset($product['is_promotion'])) {
-                    $product['is_promotion'] = !empty($product['promotion_price']) && 
-                        isset($product['promotion_start']) && 
-                        isset($product['promotion_end']) && 
-                        strtotime($product['promotion_start']) <= time() && 
-                        strtotime($product['promotion_end']) >= time();
-                }
-                if ($product['is_promotion']) {
-                    if (!isset($product['original_price'])) {
-                        $product['original_price'] = $product['price'];
-                    }
-                    $product['price'] = $product['promotion_price'];
-                }
-
-                // Ajouter le produit au panier
-                if (!isset($_SESSION['cartItems'])) {
-                    $_SESSION['cartItems'] = [];
-                }
-
-                // Vérifier si le produit est déjà dans le panier
-                $found = false;
-                foreach ($_SESSION['cartItems'] as &$item) {
-                    if ($item['id'] === $productId) {
-                        $item['quantity'] += $quantity;
-                        $found = true;
-                        break;
-                    }
-                }
-
-                // Si le produit n'est pas dans le panier, l'ajouter
-                if (!$found) {
-                    $product['quantity'] = $quantity;
-                    $_SESSION['cartItems'][] = $product;
-                }
-
-                // Si la requête est AJAX, retourner le nombre d'articles dans le panier
-                if (isset($_POST['ajax']) && $_POST['ajax'] == '1') {
-                    echo count($_SESSION['cartItems']);
-                    exit;
-                }
-            }
-        } else {
-            echo "Produit non trouvé.";
-        }
-    }
-
-    // Rediriger vers la page du panier
-    header('Location: /ecommerce/views/pages/cart.php');
-    exit;
-}
-
-$cart = $_SESSION['cartItems'] ?? [];
+$cart = $_SESSION['cart'] ?? [];
 $products = [];
+$total_price = 0;
 
-foreach ($cart as $item) {
-    $product = getProductById($item['id']);
+foreach ($cart as $article_id => $quantity) {
+    $stmt = $pdo->prepare("SELECT * FROM articles WHERE id = ?");
+    $stmt->execute([$article_id]);
+    $product = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($product) {
+        $product['quantity'] = $quantity;
+        $product['total_price'] = $product['price'] * $quantity;
+        $total_price += $product['total_price'];
         $products[] = $product;
     }
 }
@@ -108,13 +42,15 @@ foreach ($cart as $item) {
                 <?php foreach ($products as $product): ?>
                     <div class="col-md-4 mb-4">
                         <div class="card">
-                            <?php if (!empty($product['image'])): ?>
-                                <img src="<?php echo htmlspecialchars($product['image']); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($product['name']); ?>">
+                            <?php if (!empty($product['image_url'])): ?>
+                                <img src="<?php echo htmlspecialchars($product['image_url']); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($product['name']); ?>">
                             <?php endif; ?>
                             <div class="card-body">
                                 <h5 class="card-title"><?php echo htmlspecialchars($product['name']); ?></h5>
                                 <p class="card-text"><?php echo htmlspecialchars($product['description']); ?></p>
-                                <p class="card-text">Price: $<?php echo number_format($product['price'], 2); ?></p>
+                                <p class="card-text">Price: <?php echo number_format($product['price'], 2); ?> €</p>
+                                <p class="card-text">Quantity: <?php echo htmlspecialchars($product['quantity']); ?></p>
+                                <p class="card-text">Total: <?php echo number_format($product['total_price'], 2); ?> €</p>
                                 <form action="/ecommerce/public/remove_from_cart.php" method="post">
                                     <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
                                     <button type="submit" class="btn btn-danger">Remove</button>
@@ -123,6 +59,16 @@ foreach ($cart as $item) {
                         </div>
                     </div>
                 <?php endforeach; ?>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <h3>Total Price: <?php echo number_format($total_price, 2); ?> €</h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <a href="/ecommerce/public/pay.php" class="btn btn-success">Payer</a>
+                </div>
             </div>
         <?php endif; ?>
     </main>

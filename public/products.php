@@ -1,10 +1,29 @@
 <?php
+require_once '../config/database.php';
+require_once '../controllers/ProductController.php';
 session_start();
 
-require_once __DIR__ . '/../controllers/ProductController.php';
+// Configuration de la pagination
+$total_products = $pdo->query("SELECT COUNT(*) FROM articles")->fetchColumn();
+$products_per_page = ceil($total_products / 3);
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = min(3, max(1, $page));
 
-$products = getAllProducts();
+$offset = ($page - 1) * $products_per_page;
+
+// Récupérer les produits comme dans index.php
+$products = getAllProducts($products_per_page, $offset);
+foreach ($products as &$product) {
+    if (!empty($product['promotion_price']) && 
+        strtotime($product['promotion_start']) <= time() && 
+        strtotime($product['promotion_end']) >= time()) {
+        $product['is_promotion'] = true;
+    } else {
+        $product['is_promotion'] = false;
+    }
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -32,7 +51,7 @@ $products = getAllProducts();
 <body>
     <?php include __DIR__ . '/../includes/navbar.php'; ?>
     <main class="container mt-5">
-        <h2>Our Products</h2>
+        <h2>Our Products - Page <?= $page ?> sur 3</h2>
         <?php if (empty($products)): ?>
             <p>No products available.</p>
         <?php else: ?>
@@ -41,19 +60,31 @@ $products = getAllProducts();
                     <div class="col-md-4 mb-4 d-flex align-items-stretch">
                         <div class="card">
                             <?php if (!empty($product['image'])): ?>
-                                <img src="<?php echo htmlspecialchars($product['image']); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($product['name']); ?>">
+                                <img src="<?= htmlspecialchars($product['image']) ?>" class="card-img-top" alt="<?= htmlspecialchars($product['name']) ?>">
                             <?php endif; ?>
-                            <div class="card-body">
-                                <h5 class="card-title"><?php echo htmlspecialchars($product['name']); ?></h5>
-                                <p class="card-text"><?php echo htmlspecialchars($product['description']); ?></p>
-                                <?php if ($product['is_promotion']): ?>
-                                    <p class="card-text"><span class="text-danger">Promotion: $<?php echo number_format($product['promotion_price'], 2); ?></span> <del>$<?php echo number_format($product['price'], 2); ?></del></p>
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title"><?= htmlspecialchars($product['name']) ?></h5>
+                                <p class="card-text"><?= htmlspecialchars($product['description']) ?></p>
+                                <?php if ($product['has_promotion']): ?>
+                                    <p class="card-text">
+                                        <span class="text-danger fw-bold">
+                                            <?= number_format($product['price'], 2) ?> €
+                                        </span>
+                                        <del class="text-muted ms-2">
+                                            <?= number_format($product['original_price'], 2) ?> €
+                                        </del>
+                                        <span class="badge bg-danger ms-2">
+                                            -<?= $product['reduction'] ?>%
+                                        </span>
+                                    </p>
                                 <?php else: ?>
-                                    <p class="card-text">Price: $<?php echo number_format($product['price'], 2); ?></p>
+                                    <p class="card-text"><?= number_format($product['price'], 2) ?> €</p>
                                 <?php endif; ?>
-                                <form action="/ecommerce/public/cart.php" method="post">
-                                    <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
-                                    <button type="submit" class="btn btn-primary">Add to Cart</button>
+                                <form action="/ecommerce/public/cart.php" method="post" class="mt-auto">
+                                    <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
+                                    <button type="submit" class="btn btn-primary btn-block">
+                                        <i class="fas fa-shopping-cart"></i> Ajouter au panier
+                                    </button>
                                 </form>
                             </div>
                         </div>
@@ -61,6 +92,28 @@ $products = getAllProducts();
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
+        <!-- Pagination à 3 pages -->
+        <nav aria-label="Navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <?php if ($page > 1): ?>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<?= $page - 1 ?>">Précédent</a>
+                    </li>
+                <?php endif; ?>
+
+                <?php for ($i = 1; $i <= 3; $i++): ?>
+                    <li class="page-item <?= $i == $page ? 'active' : '' ?>">
+                        <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                    </li>
+                <?php endfor; ?>
+
+                <?php if ($page < 3): ?>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<?= $page + 1 ?>">Suivant</a>
+                    </li>
+                <?php endif; ?>
+            </ul>
+        </nav>
     </main>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>

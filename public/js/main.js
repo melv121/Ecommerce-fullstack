@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', async (e) => {
         if (e.target.matches('[data-link]')) {
             e.preventDefault();
+            console.log(`Navigating to ${e.target.href}`);
             navigateTo(e.target.href);
         }
     });
@@ -18,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const formData = new FormData(e.target);
             const url = new URL(e.target.action);
             url.search = new URLSearchParams(formData).toString();
+            console.log(`Submitting form to ${url.toString()}`);
             navigateTo(url.toString());
         }
     });
@@ -28,10 +30,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (target.classList.contains('pagination-link')) {
             event.preventDefault();
             const url = target.getAttribute('href');
+            console.log(`Pagination link clicked: ${url}`);
             navigateTo(url);
         } else if (target.parentElement && target.parentElement.classList.contains('pagination-link')) {
             event.preventDefault();
             const url = target.parentElement.getAttribute('href');
+            console.log(`Pagination link clicked: ${url}`);
             navigateTo(url);
         }
     });

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : jeu. 09 jan. 2025 à 12:25
+-- Généré le : mar. 28 jan. 2025 à 12:17
 -- Version du serveur : 10.4.32-MariaDB
 -- Version de PHP : 8.2.12
 
@@ -24,6 +24,20 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `article`
+--
+
+CREATE TABLE `article` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `promotion_price` decimal(10,2) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `articles`
 --
 
@@ -35,16 +49,13 @@ CREATE TABLE `articles` (
   `stock` int(11) DEFAULT 0,
   `image` varchar(255) DEFAULT NULL,
   `category_id` int(11) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `promotion_price` decimal(10,2) DEFAULT NULL,
+  `promotion_start` date DEFAULT NULL,
+  `promotion_end` date DEFAULT NULL,
+  `reduction` decimal(5,2) DEFAULT 0.00,
+  `image_url` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Déchargement des données de la table `articles`
---
-
-INSERT INTO `articles` (`id`, `name`, `description`, `price`, `stock`, `image`, `category_id`, `created_at`) VALUES
-(1, 'Ordinateur', 'Un super ordinateur', 999.99, 10, 'computer.jpg', 1, '2025-01-07 13:17:02'),
-(2, 'Livre de PHP', 'Apprenez PHP en 24 heures', 29.99, 50, 'php_book.jpg', 2, '2025-01-07 13:17:02');
 
 -- --------------------------------------------------------
 
@@ -57,15 +68,6 @@ CREATE TABLE `categories` (
   `name` varchar(100) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Déchargement des données de la table `categories`
---
-
-INSERT INTO `categories` (`id`, `name`, `created_at`) VALUES
-(1, 'Électronique', '2025-01-07 13:17:02'),
-(2, 'Livres', '2025-01-07 13:17:02'),
-(3, 'Vêtements', '2025-01-07 13:17:02');
 
 -- --------------------------------------------------------
 
@@ -98,6 +100,22 @@ CREATE TABLE `order_items` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `products`
+--
+
+CREATE TABLE `products` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `description` text DEFAULT NULL,
+  `stock` int(11) DEFAULT 0,
+  `promotion` int(11) DEFAULT NULL,
+  `image` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `users`
 --
 
@@ -111,15 +129,14 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `users`
---
-
-INSERT INTO `users` (`id`, `username`, `email`, `password`, `role`, `created_at`) VALUES
-(1, 'admin', 'admin@example.com', 'hashed_password', 'admin', '2025-01-07 13:17:02');
-
---
 -- Index pour les tables déchargées
 --
+
+--
+-- Index pour la table `article`
+--
+ALTER TABLE `article`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Index pour la table `articles`
@@ -150,6 +167,12 @@ ALTER TABLE `order_items`
   ADD KEY `article_id` (`article_id`);
 
 --
+-- Index pour la table `products`
+--
+ALTER TABLE `products`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Index pour la table `users`
 --
 ALTER TABLE `users`
@@ -161,16 +184,22 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT pour la table `article`
+--
+ALTER TABLE `article`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT pour la table `articles`
 --
 ALTER TABLE `articles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `orders`
@@ -185,10 +214,16 @@ ALTER TABLE `order_items`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT pour la table `products`
+--
+ALTER TABLE `products`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT pour la table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Contraintes pour les tables déchargées

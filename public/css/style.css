@@ -12,11 +12,19 @@
 }
 
 /* Global Styles */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
 body {
     background-color: var(--background-color);
     color: var(--text-color);
     font-family: 'Poppins', sans-serif;
     transition: background-color 0.5s ease, color 0.5s ease;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 /* ...existing code... */
@@ -67,6 +75,8 @@ header nav ul li a:hover {
 
 main {
     padding: 2rem;
+    flex: 1 0 auto;
+    padding-bottom: 50px; /* Ajoute de l'espace avant le footer */
 }
 
 #product-list {
@@ -447,11 +457,13 @@ nav ul li a:hover {
 
 /* Footer */
 footer {
+    flex-shrink: 0; /* Empêche le footer de se rétrécir */
+    width: 100%;
     background-color: var(--card-background);
     color: var(--text-color);
     padding: 20px 0;
-    text-align: center;
-    margin-top: 50px;
+    position: relative; /* Change la position en relative */
+    margin-top: auto; /* Pousse le footer vers le bas */
 }
 
 footer a {
@@ -533,4 +545,18 @@ footer a:hover {
 
 .fa-search {
     font-size: 0.9rem;
+}
+
+.hero-section {
+    background: url('/ecommerce/image2.jpg') no-repeat center center;
+    background-size: cover;
+    height: 100vh; /* Utiliser 100vh pour prendre toute la hauteur de la fenêtre */
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+.hero-section h1 {
+    font-size: 3rem;
 }

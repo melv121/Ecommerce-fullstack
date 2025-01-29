@@ -1,141 +1,96 @@
 <?php
-require_once('config/database.php');
+require_once 'config/database.php';
+session_start();
 
-// Pagination logic
-$limit = 12; // Number of products per page
+// Vérifier si l'utilisateur est connecté
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /ecommerce/public/register.php');
+    exit;
+}
+
+// Calcul pour avoir exactement 3 pages
+$total_articles = $pdo->query("SELECT COUNT(*) FROM articles")->fetchColumn();
+$articles_per_page = ceil($total_articles / 3); // Diviser le total en 3 pages égales
+$pages_total = 3; // Forcer 3 pages
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$offset = ($page - 1) * $limit;
+$page = min($pages_total, max(1, $page)); // Limiter entre 1 et 3
 
-// Category filter
-$category_id = isset($_GET['category_id']) ? (int)$_GET['category_id'] : 0;
+$offset = ($page - 1) * $articles_per_page;
 
-// Search filter
-$search = isset($_GET['search']) ? $_GET['search'] : '';
-
-// Fetch products with limit, offset, category, and search filters
-$sql = "SELECT * FROM articles WHERE 1";
-if ($category_id > 0) {
-    $sql .= " AND category_id = $category_id";
-}
-if (!empty($search)) {
-    $sql .= " AND (name LIKE '%$search%' OR description LIKE '%$search%')";
-}
-$sql .= " LIMIT $limit OFFSET $offset";
-$result = $conn->query($sql);
-
-// Fetch total number of products
-$total_sql = "SELECT COUNT(*) FROM articles WHERE 1";
-if ($category_id > 0) {
-    $total_sql .= " AND category_id = $category_id";
-}
-if (!empty($search)) {
-    $total_sql .= " AND (name LIKE '%$search%' OR description LIKE '%$search%')";
-}
-$total_result = $conn->query($total_sql);
-$total_row = $total_result->fetch_row();
-$total_articles = $total_row[0];
-$total_pages = ceil($total_articles / $limit);
+// Récupérer les articles de la page courante
+$sql = "SELECT * FROM articles ORDER BY id DESC LIMIT :limit OFFSET :offset";
+$stmt = $pdo->prepare($sql);
+$stmt->bindValue(':limit', $articles_per_page, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
+$articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <?php include 'template/header.php'; ?>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produits - Fishop</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="/ecommerce/public/css/style.css">
 </head>
 <body>
-    <div class="container mt-4">
-        <!-- Category filter and search form -->
-        <form method="GET" action="products.php" class="mb-4">
-            <div class="row">
-                <div class="col-md-4">
-                    <select name="category_id" class="form-control">
-                        <option value="0">Toutes les catégories</option>
-                        <?php
-                        $categories_sql = "SELECT * FROM categories";
-                        $categories_result = $conn->query($categories_sql);
-                        while ($category = $categories_result->fetch_assoc()): ?>
-                            <option value="<?php echo $category['id']; ?>" <?php if ($category_id == $category['id']) echo 'selected'; ?>>
-                                <?php echo htmlspecialchars($category['name']); ?>
-                            </option>
-                        <?php endwhile; ?>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <input type="text" name="search" class="form-control" placeholder="Rechercher..." value="<?php echo htmlspecialchars($search); ?>">
-                </div>
-                <div class="col-md-4">
-                    <button type="submit" class="btn btn-primary">Filtrer</button>
-                </div>
-            </div>
-        </form>
+    <?php include __DIR__ . '/includes/navbar.php'; ?>
 
+    <div class="container mt-5">
+        <h1>Nos Produits - Page <?= $page ?>/3</h1>
+        
         <div class="row">
-            <?php while($row = $result->fetch_assoc()): ?>
+            <?php foreach ($articles as $article): ?>
                 <div class="col-md-4 mb-4">
-                    <div class="card">
-                        <?php 
-                        $image_path = "uploads/" . $row['image'];
-                        if($row['image'] && file_exists($image_path)): ?>
-                            <img src="<?php echo $image_path; ?>" 
-                                 class="card-img-top" 
-                                 alt="<?php echo htmlspecialchars($row['name']); ?>"
-                                 style="height: 200px; object-fit: contain;">
-                     
+                    <div class="card h-100">
+                        <?php if (!empty($article['image_url'])): ?>
+                            <img src="<?= htmlspecialchars($article['image_url']) ?>" class="card-img-top" alt="<?= htmlspecialchars($article['name']) ?>">
                         <?php endif; ?>
-                        
                         <div class="card-body">
-                            <h5 class="card-title"><?php echo htmlspecialchars($row['name']); ?></h5>
-                            <p class="card-text"><?php echo htmlspecialchars($row['description']); ?></p>
-                            <?php if($row['reduction'] > 0): ?>
-                                <p class="card-text">
-                                    <del class="text-muted"><?php echo number_format($row['price'], 2); ?> €</del>
-                                    <strong class="text-danger">
-                                        <?php echo number_format($row['price'] * (1 - $row['reduction']/100), 2); ?> €
-                                    </strong>
-                                    <span class="badge badge-danger">-<?php echo $row['reduction']; ?>%</span>
-                                </p>
-                            <?php else: ?>
-                                <p class="card-text"><strong><?php echo number_format($row['price'], 2); ?> €</strong></p>
-                            <?php endif; ?>
-                            <a href="add_to_cart.php?id=<?php echo $row['id']; ?>" class="btn btn-primary">
-                                Ajouter au panier
-                            </a>
+                            <h5 class="card-title"><?= htmlspecialchars($article['name']) ?></h5>
+                            <p class="card-text"><?= htmlspecialchars($article['description']) ?></p>
+                            <p class="card-text"><strong><?= htmlspecialchars($article['price']) ?> €</strong></p>
+                            <form action="add_to_cart.php" method="post">
+                                <input type="hidden" name="article_id" value="<?= htmlspecialchars($article['id']); ?>">
+                                <input type="hidden" name="redirect_to_cart" value="1">
+                                <button type="submit" class="btn btn-primary">Ajouter au panier</button>
+                            </form>
                         </div>
                     </div>
                 </div>
-            <?php endwhile; ?>
+            <?php endforeach; ?>
         </div>
-        
-        <!-- Pagination arrows and numbers -->
-        <div class="pagination">
-            <?php if($page > 1): ?>
-                <a href="?page=1&category_id=<?php echo $category_id; ?>&search=<?php echo htmlspecialchars($search); ?>" class="arrow">&laquo; Premier</a>
-                <a href="?page=<?php echo $page - 1; ?>&category_id=<?php echo $category_id; ?>&search=<?php echo htmlspecialchars($search); ?>" class="arrow">Précédent</a>
-            <?php endif; ?>
 
-            <?php
-            // Affichage des numéros de page
-            $start = max(1, $page - 2);
-            $end = min($total_pages, $page + 2);
+        <!-- Pagination fixe à 3 pages -->
+        <nav aria-label="Navigation des pages" class="mt-4 mb-4">
+            <ul class="pagination justify-content-center">
+                <?php if ($page > 1): ?>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<?= $page - 1 ?>">Précédent</a>
+                    </li>
+                <?php endif; ?>
 
-            for($i = $start; $i <= $end; $i++): ?>
-                <a href="?page=<?php echo $i; ?>&category_id=<?php echo $category_id; ?>&search=<?php echo htmlspecialchars($search); ?>" 
-                   class="page-number <?php echo ($i == $page) ? 'active' : ''; ?>">
-                    <?php echo $i; ?>
-                </a>
-            <?php endfor; ?>
+                <?php for ($i = 1; $i <= 3; $i++): ?>
+                    <li class="page-item <?= $i == $page ? 'active' : '' ?>">
+                        <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                    </li>
+                <?php endfor; ?>
 
-            <?php if($page < $total_pages): ?>
-                <a href="?page=<?php echo $page + 1; ?>&category_id=<?php echo $category_id; ?>&search=<?php echo htmlspecialchars($search); ?>" class="arrow">Suivant</a>
-                <a href="?page=<?php echo $total_pages; ?>&category_id=<?php echo $category_id; ?>&search=<?php echo htmlspecialchars($search); ?>" class="arrow">Dernier &raquo;</a>
-            <?php endif; ?>
-        </div>
+                <?php if ($page < 3): ?>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<?= $page + 1 ?>">Suivant</a>
+                    </li>
+                <?php endif; ?>
+            </ul>
+        </nav>
     </div>
 
-    <?php include 'template/footer.php'; ?>
+    <?php include 'includes/footer.php'; ?>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
-
-<?php
-$conn->close();
-?>

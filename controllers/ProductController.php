@@ -8,24 +8,34 @@ function getConnection() {
     return $database->getConnection();
 }
 
-function getAllProducts() {
+function getAllProducts($limit = null, $offset = 0) {
     $conn = getConnection();
-    $query = "SELECT id, name, description, price, promotion_price, promotion_start, promotion_end, image FROM articles";
-    $result = $conn->query($query);
+    $query = "SELECT id, name, description, price, stock, reduction, image 
+              FROM articles 
+              ORDER BY id DESC";
+    if ($limit !== null) {
+        $query .= " LIMIT :limit OFFSET :offset";
+    }
+    
+    $stmt = $conn->prepare($query);
+    
+    if ($limit !== null) {
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    }
+    
+    $stmt->execute();
     $products = [];
-    if ($result->rowCount() > 0) { // Updated to rowCount()
-        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-            if (!empty($row['promotion_price']) && 
-                isset($row['promotion_start']) && 
-                isset($row['promotion_end']) && 
-                strtotime($row['promotion_start']) <= time() && 
-                strtotime($row['promotion_end']) >= time()) {
-                $row['is_promotion'] = true;
-            } else {
-                $row['is_promotion'] = false;
-            }
-            $products[] = $row;
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Calcul du prix avec réduction
+        if (!empty($row['reduction'])) {
+            $row['has_promotion'] = true;
+            $row['original_price'] = $row['price'];
+            $row['price'] = $row['price'] * (1 - ($row['reduction'] / 100));
+        } else {
+            $row['has_promotion'] = false;
         }
+        $products[] = $row;
     }
     return $products;
 }
@@ -67,5 +77,5 @@ function getProductById($id) {
     return $result;
 }
 
-// ...existing code...
+
 ?>

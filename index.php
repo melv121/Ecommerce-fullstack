@@ -1,10 +1,16 @@
 <?php
 session_start();
+require_once 'config/database.php';
 
 if (!isset($_SESSION['user_id'])) {
     header('Location: /ecommerce/public/register.php');
     exit;
 }
+
+// Récupérer tous les articles
+$sql = "SELECT * FROM articles ORDER BY id DESC";
+$stmt = $pdo->query($sql);
+$articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -19,7 +25,7 @@ if (!isset($_SESSION['user_id'])) {
         .hero-section {
             background: url('/ecommerce/image2.jpg') no-repeat center center;
             background-size: cover;
-            height: 500px;
+            height: 100vh; /* Utiliser 100vh pour prendre toute la hauteur de la fenêtre */
             color: white;
             display: flex;
             align-items: center;
@@ -57,46 +63,52 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
             </div>
         </section>
-        <section id="products" class="container mt-5">
+        <section id="categories" class="container mt-5">
             <div class="row">
-                <?php
-                require_once __DIR__ . '/controllers/ProductController.php';
-                $products = getAllProducts();
-                foreach ($products as &$product) {
-                    if (!empty($product['promotion_price']) && strtotime($product['promotion_start']) <= time() && strtotime($product['promotion_end']) >= time()) {
-                        $product['is_promotion'] = true;
-                    } else {
-                        $product['is_promotion'] = false;
-                    }
-                }
-                if (empty($products)): ?>
-                    <p>Aucun produit disponible.</p>
-                <?php else: ?>
-                    <div class="row">
-                        <?php foreach ($products as $product): ?>
-                            <div class="col-md-4 mb-4 d-flex align-items-stretch">
-                                <div class="card">
-                                    <?php if (!empty($product['image'])): ?>
-                                        <img src="<?php echo htmlspecialchars($product['image']); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($product['name']); ?>">
-                                    <?php endif; ?>
-                                    <div class="card-body">
-                                        <h5 class="card-title"><?php echo htmlspecialchars($product['name']); ?></h5>
-                                        <p class="card-text"><?php echo htmlspecialchars($product['description']); ?></p>
-                                        <?php if ($product['is_promotion']): ?>
-                                            <p class="card-text"><span class="text-danger">Promotion : $<?php echo number_format($product['promotion_price'], 2); ?></span> <del>$<?php echo number_format($product['price'], 2); ?></del></p>
-                                        <?php else: ?>
-                                            <p class="card-text">Prix : $<?php echo number_format($product['price'], 2); ?></p>
-                                        <?php endif; ?>
-                                        <form action="/ecommerce/public/cart.php" method="post">
-                                            <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
-                                            <button type="submit" class="btn btn-primary">Ajouter au panier</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
+                <!-- Catégorie 1 -->
+                <div class="col-md-3 mb-4">
+                    <div class="card">
+                        <img src="images/electronics.jpg" class="card-img-top" alt="Électronique">
+                        <div class="card-body">
+                            <h5 class="card-title">Électronique</h5>
+                            <p class="card-text">Découvrez nos produits électroniques</p>
+                            <a href="articles_by_category.php?category_id=1" class="btn btn-primary">Voir les produits</a>
+                        </div>
                     </div>
-                <?php endif; ?>
+                </div>
+                <!-- Catégorie 2 -->
+                <div class="col-md-3 mb-4">
+                    <div class="card">
+                        <img src="images/clothing.jpg" class="card-img-top" alt="Vêtements">
+                        <div class="card-body">
+                            <h5 class="card-title">Vêtements</h5>
+                            <p class="card-text">Notre collection de vêtements</p>
+                            <a href="articles_by_category.php?category_id=2" class="btn btn-primary">Voir les produits</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Catégorie 3 -->
+                <div class="col-md-3 mb-4">
+                    <div class="card">
+                        <img src="images/books.jpg" class="card-img-top" alt="Livres">
+                        <div class="card-body">
+                            <h5 class="card-title">Livres</h5>
+                            <p class="card-text">Explorez notre bibliothèque</p>
+                            <a href="articles_by_category.php?category_id=3" class="btn btn-primary">Voir les produits</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Catégorie 4 -->
+                <div class="col-md-3 mb-4">
+                    <div class="card">
+                        <img src="images/sports.jpg" class="card-img-top" alt="Sports">
+                        <div class="card-body">
+                            <h5 class="card-title">Sports & Loisirs</h5>
+                            <p class="card-text">Équipements sportifs et loisirs</p>
+                            <a href="articles_by_category.php?category_id=4" class="btn btn-primary">Voir les produits</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
