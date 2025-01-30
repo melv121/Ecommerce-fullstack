@@ -23,9 +23,13 @@ $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="/ecommerce/public/css/style.css">
     <style>
         .hero-section {
-            background: url('/ecommerce/image2.jpg') no-repeat center center;
+            background: url('/ecommerce/image2.jpg') no-repeat center center fixed;
             background-size: cover;
-            height: 100vh; /* Utiliser 100vh pour prendre toute la hauteur de la fenêtre */
+            min-height: 100vh;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            position: relative;
             color: white;
             display: flex;
             align-items: center;
@@ -33,7 +37,8 @@ $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
             text-align: center;
         }
         .hero-section h1 {
-            font-size: 3rem;
+            font-size: 4rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
         .card {
             height: 100%;

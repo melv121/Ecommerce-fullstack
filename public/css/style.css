@@ -281,6 +281,11 @@ nav ul li a:hover {
     color: var(--accent-color) !important;
 }
 
+.navbar .nav-link span {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
 /* Search Form */
 #search-form {
     display: flex;
@@ -547,16 +552,9 @@ footer a:hover {
     font-size: 0.9rem;
 }
 
+/* Supprimer ou commenter la section hero-section existante */
+/* 
 .hero-section {
-    background: url('/ecommerce/image2.jpg') no-repeat center center;
-    background-size: cover;
-    height: 100vh; /* Utiliser 100vh pour prendre toute la hauteur de la fenêtre */
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+    ...
 }
-.hero-section h1 {
-    font-size: 3rem;
-}
+*/
