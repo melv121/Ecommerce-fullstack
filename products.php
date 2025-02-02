@@ -2,22 +2,22 @@
 require_once 'config/database.php';
 session_start();
 
-// Vérifier si l'utilisateur est connecté
+
 if (!isset($_SESSION['user_id'])) {
     header('Location: /ecommerce/public/register.php');
     exit;
 }
 
-// Calcul pour avoir exactement 3 pages
+
 $total_articles = $pdo->query("SELECT COUNT(*) FROM articles")->fetchColumn();
-$articles_per_page = ceil($total_articles / 3); // Diviser le total en 3 pages égales
+$articles_per_page = ceil($total_articles / 3); 
 $pages_total = 3; // Forcer 3 pages
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$page = min($pages_total, max(1, $page)); // Limiter entre 1 et 3
+$page = min($pages_total, max(1, $page)); 
 
 $offset = ($page - 1) * $articles_per_page;
 
-// Récupérer les articles de la page courante
+
 $sql = "SELECT * FROM articles ORDER BY id DESC LIMIT :limit OFFSET :offset";
 $stmt = $pdo->prepare($sql);
 $stmt->bindValue(':limit', $articles_per_page, PDO::PARAM_INT);
@@ -52,7 +52,17 @@ $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <div class="card-body">
                             <h5 class="card-title"><?= htmlspecialchars($article['name']) ?></h5>
                             <p class="card-text"><?= htmlspecialchars($article['description']) ?></p>
-                            <p class="card-text"><strong><?= htmlspecialchars($article['price']) ?> €</strong></p>
+                            <?php if (!empty($article['reduction']) && $article['promotion_start'] <= date('Y-m-d') && $article['promotion_end'] >= date('Y-m-d')): ?>
+                                <p class="card-text">
+                                    <del class="text-danger"><?= number_format($article['price'], 2) ?> €</del>
+                                    <strong class="text-success">
+                                        <?= number_format($article['price'] * (1 - $article['reduction']/100), 2) ?> €
+                                    </strong>
+                                    <span class="badge badge-danger">-<?= $article['reduction'] ?>%</span>
+                                </p>
+                            <?php else: ?>
+                                <p class="card-text"><strong><?= number_format($article['price'], 2) ?> €</strong></p>
+                            <?php endif; ?>
                             <form action="add_to_cart.php" method="post">
                                 <input type="hidden" name="article_id" value="<?= htmlspecialchars($article['id']); ?>">
                                 <input type="hidden" name="redirect_to_cart" value="1">
@@ -64,7 +74,7 @@ $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php endforeach; ?>
         </div>
 
-        <!-- Pagination fixe à 3 pages -->
+       
         <nav aria-label="Navigation des pages" class="mt-4 mb-4">
             <ul class="pagination justify-content-center">
                 <?php if ($page > 1): ?>

@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Récupérer tous les articles
+
 $sql = "SELECT * FROM articles ORDER BY id DESC";
 $stmt = $pdo->query($sql);
 $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -70,7 +70,7 @@ $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </section>
         <section id="categories" class="container mt-5">
             <div class="row">
-                <!-- Catégorie 1 -->
+                
                 <div class="col-md-3 mb-4">
                     <div class="card">
                         <img src="images/electronics.jpg" class="card-img-top" alt="Électronique">
@@ -81,7 +81,7 @@ $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </div>
                     </div>
                 </div>
-                <!-- Catégorie 2 -->
+                
                 <div class="col-md-3 mb-4">
                     <div class="card">
                         <img src="images/clothing.jpg" class="card-img-top" alt="Vêtements">
@@ -92,7 +92,7 @@ $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </div>
                     </div>
                 </div>
-                <!-- Catégorie 3 -->
+                
                 <div class="col-md-3 mb-4">
                     <div class="card">
                         <img src="images/books.jpg" class="card-img-top" alt="Livres">
@@ -103,7 +103,7 @@ $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </div>
                     </div>
                 </div>
-                <!-- Catégorie 4 -->
+               
                 <div class="col-md-3 mb-4">
                     <div class="card">
                         <img src="images/sports.jpg" class="card-img-top" alt="Sports">

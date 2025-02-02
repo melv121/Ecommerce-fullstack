@@ -77,5 +77,23 @@ function getProductById($id) {
     return $result;
 }
 
+function getActivePromotions() {
+    $conn = getConnection();
+    $query = "SELECT * FROM articles 
+              WHERE reduction > 0 
+              AND promotion_start <= CURRENT_DATE 
+              AND promotion_end >= CURRENT_DATE";
+    
+    $stmt = $conn->prepare($query);
+    $stmt->execute();
+    $promotions = [];
+    
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $row['discounted_price'] = $row['price'] * (1 - ($row['reduction']/100));
+        $promotions[] = $row;
+    }
+    
+    return $promotions;
+}
 
 ?>

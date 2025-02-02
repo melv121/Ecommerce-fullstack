@@ -8,7 +8,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$category_id = $_GET['category_id'] ?? 1; // Par défaut, la première catégorie
+$category_id = $_GET['category_id'] ?? 1; 
 
 $sql = "SELECT * FROM articles WHERE category_id = ?";
 $stmt = $conn->prepare($sql);

@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log("main.js loaded");
-    // Initialize
+
     initializeApp();
 
-    // Handle navigation
+
     document.addEventListener('click', async (e) => {
         if (e.target.matches('[data-link]')) {
             e.preventDefault();
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Handle form submissions
+    
     document.addEventListener('submit', async (e) => {
         if (e.target.matches('[data-form]')) {
             e.preventDefault();
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Handle pagination link clicks
+    
     document.getElementById('main-content').addEventListener('click', function(event) {
         let target = event.target;
         if (target.classList.contains('pagination-link')) {
@@ -44,10 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
 async function navigateTo(url) {
     try {
         console.log(`Navigating to ${url}`);
-        // Update URL without page reload
+       
         history.pushState(null, null, url);
         
-        // Fetch new content
+        
         const response = await fetch(url, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
@@ -70,11 +70,11 @@ async function navigateTo(url) {
 }
 
 function initializeApp() {
-    // Handle browser back/forward buttons
+   
     window.addEventListener('popstate', () => {
         navigateTo(window.location.href);
     });
 
-    // Load initial content
+   
     navigateTo(window.location.href);
 }

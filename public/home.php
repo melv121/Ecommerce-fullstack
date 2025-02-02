@@ -4,10 +4,9 @@ require_once __DIR__ . '/../includes/database.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../controllers/ProductController.php';
 
-// Initialize the database connection
+
 $conn = (new Database())->getConnection();
 
-// Fetch all articles to display on the home page
 $articles = getAllArticles();
 ?>
 <!DOCTYPE html>

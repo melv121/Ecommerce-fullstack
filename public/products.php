@@ -11,7 +11,7 @@ $page = min(3, max(1, $page));
 
 $offset = ($page - 1) * $products_per_page;
 
-// Récupérer les produits comme dans index.php
+
 $products = getAllProducts($products_per_page, $offset);
 foreach ($products as &$product) {
     if (!empty($product['promotion_price']) && 

@@ -1,9 +1,9 @@
 <?php
 session_start();
-require_once __DIR__ . '/../config/database.php'; // Assurez-vous que ce fichier initialise $pdo
-require_once __DIR__ . '/../includes/functions.php'; // Corrected path to the functions file
-require_once __DIR__ . '/../controllers/ProductController.php'; // Inclure le ProductController
-require_once __DIR__ . '/../models/Cart.php'; // Inclure le modèle Cart
+require_once __DIR__ . '/../config/database.php'; 
+require_once __DIR__ . '/../includes/functions.php'; 
+require_once __DIR__ . '/../controllers/ProductController.php'; 
+require_once __DIR__ . '/../models/Cart.php'; 
 
 $cart = $_SESSION['cart'] ?? [];
 $products = [];
@@ -21,10 +21,9 @@ foreach ($cart as $article_id => $quantity) {
     }
 }
 
-// Si le formulaire de paiement est soumis
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Logique de traitement du paiement ici
-    // Par exemple, vider le panier après le paiement
+    
     unset($_SESSION['cart']);
     header('Location: /ecommerce/public/success.php');
     exit;
